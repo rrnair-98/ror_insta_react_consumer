@@ -49,6 +49,8 @@ class Home extends React.Component{
             });
     }
 
+
+
     static async fetchData(id){
         const res = await axios.get(USERS_URL+id+"/");
         return await res.data;//.json is applied implicitly

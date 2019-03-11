@@ -5,8 +5,9 @@ import NavLink from "react-router-dom/es/NavLink";
 class UserPost extends React.Component{
     constructor(){
         super()
-        this.state ={data: []};
 
+        this.state ={data: [], offset:0};
+        this.handleClick = this.handleClick.bind(this);
     }
 
 
@@ -25,7 +26,7 @@ class UserPost extends React.Component{
                                 </li>
                             ))))
                         }
-                        <NavLink to>Load more</NavLink>
+                        <button onClick={this.handleClick}>Load more</button>
                     </ul>
 
                 </div>
@@ -35,19 +36,40 @@ class UserPost extends React.Component{
 
 
     componentDidMount() {
-        console.log("Here")
-        UserPost.fetchData(this.props.match.params.id).then(receivedJSON => {
-            let currentDataArray = this.state.data;
-            currentDataArray.push(receivedJSON);
-            this.setState({data: currentDataArray});
-            console.log(this.state.data);
-        }).catch(err=> {
+        this.dataFetcherDelegate(0)
+    }
+
+    dataFetcherDelegate(offset){
+        console.log("Here");
+        UserPost.fetchData(this.props.match.params.id, offset).then(receivedJSON => {
+            if(  typeof receivedJSON != "undefined"
+                && receivedJSON != null
+                && receivedJSON.length != null
+                && receivedJSON.length > 0
+            ) {
+
+                let currentDataArray = this.state.data;
+                currentDataArray.push(receivedJSON);
+                this.setState({data: currentDataArray});
+                console.log(this.state.data);
+            }
+        else
+            alert("nothing to fetch");
+
+    }
+        ).catch(err=> {
             console.log(err);
         });
     }
 
-    static async fetchData(id){
-        const res = await axios.get(USERS_URL+id+"/posts");
+
+    handleClick(){
+        let current = this.state.offset + 5;
+        this.setState(state => ({offset: current}))
+        this.dataFetcherDelegate(current);
+    }
+    static async fetchData(id, offset){
+        const res = await axios.get(USERS_URL+id+"/posts/"+offset);
         return await res.data;//.json is applied implicitly
     }
 
